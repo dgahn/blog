@@ -188,3 +188,63 @@ public class NutritionFacts {
 
 - 빌더를 생성해야하기 때문에 성능이 중요한 경우 걸림돌이 될 수 있다.
 - 매개변수가 4개 이상 되었을 때 의미가 있다.
+
+
+### 아이템 3: private 생성자나 열거 타입으로 싱글턴임을 보증하라
+
+**싱글턴**이란 인스턴스를 오직 하나만 생성할 수 있는 클래스를 의미한다. 클래스를 싱글턴으로 만들면 mock으로 대체하기가 어렵기 때문에 테스트가 어려울 수도 있다.
+
+싱글턴을 만드는 방식은 보통 두가지다. 일단, 두가지 모두 생성자를 접근 제한자를 `private`으로 제한한다.
+
+첫번째는 필드에 인스턴스를 선언해놓는 방식
+
+```java
+public class Elvis {
+    public static final Elvis INSTANCE = new Elvis();
+    private Elivis() { ... }
+}
+```
+
+`public static final` 이기 때문에 초기화할 때 딱 한번만 호출된다. 그렇기 때문에 인스턴스가 하나임을 보장한다.단, 리플렉션 API를 활용하면 `private` 생성자를 호출할 수 있다.
+
+이 방법의 장점은 다음과 같다.
+
+- 해당 클래스가 싱글턴임이 API에 명백하게 명시된다.
+- 간결하다.
+
+두번째는 정적 팩터리 메서드를 통해서 인스턴스를 제공하는 방법이다.
+
+```java
+public class Elvis {
+    private static final Elvis INSTANCE = new Elvis();
+    private Elvis() { ... }
+    public static Elvis getInstatnce() { return INSTANCE; }
+}
+```
+
+이 방법의 장점은 다음과 같다.
+
+- 정적 팩터리 메서드를 통해 쉽게 변경할 수 있다.
+- 예를 들어, 싱글턴이 아니라 호출할 때마다 새로운 인스턴스를 반환하도록 변경할 수 있다.
+- 제네릭 싱글턴 팩터리로 만들 수 있다.(아이템 30)
+- 아이템 43, 44 참고
+
+하지만 주의해야할 점은 직렬화하고 역직렬화할 때 이런 싱글턴 패턴은 단순히 Serializable을 구현한다고 싱글턴 방식으로 동작하지 않는다. 모든 인스턴스 필드를 일시적(transient)라고 선언하고 readResolve 메서드를 제공해야한다.
+
+readResolve 메서드는 예시는 아래와 같다.
+
+```java
+private Object readResolve() {
+    return INSTANCE;
+}
+```
+
+세번째 방법은 원소가 하나인 열거 타입으로 선언하는 것이다.
+
+```java
+public enum Elvis {
+    INSTANCE;
+}
+```
+
+이 방법이 매우 간결하고 추가 노력 없이 직렬화도 할 수 있는 깔끔한 방법이다. 그래서 어색하지만 싱글턴을 만드는 **가장 좋은 방법**은 **원소가 하나뿐인 열거타입**을 만드는 것이다.
