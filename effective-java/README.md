@@ -429,3 +429,23 @@ public int hashCode() {
 기본적으로 `Object`의  `toString` 메서드는 **클래스_이름@16진수로_표시한_해시코드**를 반환하게 되어 있다. `toString` 은 사람이 읽기 쉬운 형태로 간결해야하는데 기본적인 `toString`은 간결하기는 하지만 유익한 정보라고 볼 순 없다. 그래서 프로그래머가 디버깅을 하기 위한 정보로 로그를 남기기 위해서는 사람이 읽을 수 있는 형태로 재정의를 해야한다.
 
 toString을 재정의할때 좋은 형태는 **객체가 가진 주요 필드**를 모두 표현해주는 것이 좋다.
+
+### 아이템 13: clone 재정의는 주의해서 진행하라
+
+**Java**에는 인스턴스를 복사하기 위한 도구로 `clone`이라는 메소드가 있다. 이 메소드는 **Object**에 선언이 되어있고 제대로 사용하기 위해서는 **Object**에 선언된 메소드를 오버라이딩 해야된다. 번거로운 점은 오버라이딩를 하는 동시에 복사가 가능한다는 의미로 `Cloneable`이라는 인터페이스를 **implement**를 해야한다. 이 인터페이스에는 실제로 구현해야하는 함수는 존재하지 않는다. 이렇게 단순히 표시로써의 기능만 수행하는 인터페이스를 `maker interface`라고 한다.
+
+이 clone 메소드는 깊은 복사 기반이 아닌 얕은 복사기반으로 동작한다. 그렇기 때문에 **원본 A와 복사본 A`**가 있을 때 한쪽에서 **가변 객체를 참조하는 필드를 변경**한다면 **다른 쪽에서도 변경된 값**을 가져오게 되어있다. 그래서 만약 가변 객체를 참조하는 필드가 있다면 아래와 같이 `clone` 함수를 정의해야한다.
+
+```java
+@Override public Stack clone() {
+    try {
+        Stack result = (Stack) super.clone();
+        result.elements = elements.clone();
+        return result;
+    } catch (CloneNotSupprotedException e) {
+        throw new AssertionError();
+    }
+}
+```
+
+여기서 **elements**가 배열이라면 **각 배열의 값 또한 깊은 복사**로 `clone`해야 한다.
