@@ -449,3 +449,52 @@ toString을 재정의할때 좋은 형태는 **객체가 가진 주요 필드**�
 ```
 
 여기서 **elements**가 배열이라면 **각 배열의 값 또한 깊은 복사**로 `clone`해야 한다.
+
+### 아이템 14: Comparable을 구현할지 고려하라
+
+**Comparable** 인터페이스는 `compareTo`  메소드만 가지고 있다. **Comparable**  인터페이스를 구현하고 있다는 것은 이 클래스가 숝서가 있다는 것을 의미한다. 그래서 이 클래스로 된 배열은 아래와 같이 손쉽게 정렬을 할 수 있다.
+
+```java
+Arrays.sort(a)
+```
+
+**`compareTo`**에 대한 규약은 다음과 같다.
+
+1. 두 객체의 비교를 순서가 변경되도 같은 결과가 나와야한다.
+2. A가 B보다 크고 B가 C보다 크면 A가 C보다 크다.
+3. 크기가 같은 객체끼리는 항상 같다. A=B, B=C → A=C
+
+`compareTo` 를 작성하는 요령은 다음과 같다.
+
+1. **Comparable** 인터페이스가 제네릭 타입이기 때문에 컴파일 단계에서 타입을 확정지을 수가 있다. 그렇기 때문에 타입을 확인하거나 형변환할 필요가 없다.
+2. 비교연산자는 비교자(Comparator)를 사용하면 된다.
+1. String.CASE_INENSTIVE_ORDER.compare()
+2. Short.compare()
+3. Double.compare()
+3. 핵심 필드에 대해서 먼저 비교를 하고 결과가 나오지 않으면 다음 필드를 비교하면 된다.
+
+```java
+public int compareTo(PhoneNumber pn) {
+    int result = Short.compare(areaCode, pn.areaCode);
+    if (result == 0) {
+        result = Short.compare(prefix, pn.prefix);
+        if(result == 0) {
+            result = Short.compare(lineNumb, pn.lineNum);
+            // 생략
+        }
+    }
+}
+```
+
+4. 코드를 깔끔하게 짜려면 아래와 같이 Comparator 인터페이스의 비교자 생성 메서드를 사용할 수 있다. 하지만 성능 하락이 있다.
+
+```java
+private static final Comparator<PhoneNumber> COMPARATOR =
+    comparingInt((PhoneNumber pn) -> pn.areaCode)
+    .thenComparingInt(pn -> pn.prefix)
+    .thenComparingInt(pn -> pn.lineNum);
+
+public int compareTo(PhoneNumber pn) {
+    return COMPARATOR.compare(this, pn);
+}
+```
