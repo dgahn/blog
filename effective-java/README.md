@@ -592,3 +592,74 @@ public interface PhysicalConstants {
 ```
 
 상수는 외부 인터페이스가 아니라 내부 구현에 해당한다. 그러므로 내부 구현을 외부에 공개하는 행위로 간주된다. java 라이브러리에도 상수구현이 되어 있는 인터페이스가 있다. 이런 것은 따라하면 안된다. 만약, 상수로 공개하고 싶은 경우 Enum을 사용하는 것이 좋다.
+
+### 아이템 23: 태그 달린 클래스보다는 클래스 계층구조를 활용하라
+
+한 클래스에 타입으로 구분(태그)하면서 특정 타입일 때만 값이 존재하는 클래스를 본적이 있을 것이다.
+
+```java
+class Figure {
+	enum Shape { RECTANGLE, CIRCLE };
+	
+	// 태그 필드 - 현재 모양을 나타낸다.
+	final Shape shape;
+
+	// 다음 필드들은 모양이 사각형(RECTANGLE)일 때만 쓰인다.
+	double length;
+	double width;
+
+	// 다음 필드들은 모양이 원(CIRCLE)일 때만 쓰인다.
+	double radius;
+
+	// 원용 생성자
+	Figure(double radius) {
+		shape = Shape.CIRCLE;
+		this.radius = radius;
+	}
+
+	Figure(double length, double width) {
+		shape = Shape.RECTANGLE;
+		this.length = length;
+		this.width = width;
+	}
+
+	double area() {
+		swtich(shape) {
+			case RECTANGLE:
+				return length * width;
+			... 생략
+	}
+}
+```
+
+여러 클래스에서 해야하는 역할들이 한 클래스에 혼합돼 있어서 가독성이 나쁘고 필요 없는 필드들이 항상 같이 다니기 때문에 메모리도 많이 사용한다. 
+
+위 코드는 아래와 같이 클래스의 계층 구조로 변경해서 사용할 수 있다.
+
+```java
+abstract class Figure {
+	abstract double area();
+}
+
+class Circle extends Figure {
+	final double radius;
+
+	Circle(double radius) { this.radius = radius; }
+
+	@Override double area() { return Math.PI * (radius * radius); }
+}
+
+class Rectangle extends Figure {
+	final double length;
+	final double width;
+
+	Rectangle(double length, double width) {
+		this.length = length;
+		this.width = width;
+	}
+
+	@Override double area() { return length * width; }
+}
+```
+
+코드가 간결하고 명확해졌다. 그리고 쓸모 없는 코드들도 모두 없어졌다. 타입별로 필요 없는 필드들도 모두 없어졌다. 보기 싫어졌던 case 문도 없어졌다.
