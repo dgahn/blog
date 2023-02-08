@@ -686,4 +686,187 @@ class Rectangle extends Figure {
 - 지역 클래스
     - 지역변수를 선언할 수 있는 곳이면 어디서든 선언할 수 있다.
 
-### 아이템 25: 톰레벨 클래스는 한파일레 하나만 담으라
+### 아이템 25: 톱레벨 클래스는 한 파일에 하나만 담으라
+
+소스 파일 하나에 톱레벨 클래스를 여러개 선언할 수 있다. 하지만 여러 개 선언하는 경우 다음과 같은 심각한 에러를 만들 수 있다.
+
+```java
+// Utensil.java 파일에 아래와 같이 정의
+class Utensil {
+	static final String NAME = "pan";
+}
+
+class Dessert {
+	static final String NAME = "cake";
+}
+```
+
+```java
+// Dessert.java 파일에 아래와 같이 정의
+class Utensil {
+	static final String NAME = "pot";
+}
+
+class Dessert {
+	static final String NAME = "pie";
+}
+```
+
+두 파일을 컴파일하려고 하면 중복 때문에 컴파일 오류가 발생한다. 그렇기 때문에 두 클래스를 하나의 파일에 정의하고 싶은 경우에는 클래스 안에 정적 클래스로 선언하는 것이 좋다.
+
+### 아이템 26: 로 타입은 사용하지 말라
+
+로타입이란 제네릭 타입의 클래스에서 제네릭을 쓰지 않은 타입을 의미한다.
+
+```java
+List<String> -> 제네릭 타입
+List -> 로 타입
+```
+
+로 타입은 타입 정보가 없는 것처럼 동작한다.
+
+### 아이템 27: 비검사 경고를 제거하라
+
+비검사 경고란 제네릭에 대한 타입 체크를 제대로 안했을 때 발생하는 경고로 보인다.
+
+제네릭을 사용하면 여러가지 컴파일 경고를 볼 수 있다.
+
+- 비검사 형변환 경고
+- 비검사 메소드 호출 경고
+- 비검사 매개변수화 가변인수 타입 경고
+- 비검사 변환 경고
+
+대부분의 비검사 경고는 쉽게 제거할 수 있다.
+
+```java
+Set<Lark> exaltation = new HashSet(); // [unchecked] unchecked conversion
+Set<Lark> exaltation = new HashSet<>(); // 손쉽게 해결
+```
+
+최대한 비검사 경고에 대해서 제거를 하고 만약 ClassCastException이 발생하지 않는다고 확신이 들면 `@SuprressWarnings` 을 달아서 경고를 숨기면 좋다.
+
+### 아이템 28: 배열보다는 리스트를 사용하라
+
+배열과 제네릭 타입에는 중요한 차이 두 가지가 있다. 
+
+1. 배열은 공변이고 리스트는 불공변이다.
+    - 공변은 같이 변한다는 의미로 Sub가 Super의 하위 타입일 때 Sub[]는 Super[]의 하위 타입이 된다.
+    - 불공변은 서로 다른 타입 Type1과 Type2가 있을 때 List<Type1>과 List<Type2>는 서로 상/하위 타입 관계가 아니다라는 의미다.
+
+위 글만 봐서는 제네릭 타입에 문제가 있어보이지만 실제로 문제가 되는 것은 배열이다.
+
+```java
+// 컴파일은 되지만 런타임에 ArrayStoreException이 발생한다.
+Object[] objectArray = new Long[1];
+objectArray[0] = "타입이 달라 넣을 수 없다."
+
+// 컴파일도 안된다.
+List<Object> ol = new ArrayList<Long>();
+ol.add("타입이 달라 넣을 수 없다.");
+```
+
+ 
+
+1. 배열은 실체화가 된다.
+    - 배열은 런타임에 값을 넣을 때마다 해당 타입을 계속적으로 체크한다.
+    - 리스트는 런타임에 제네릭 타입이 소거 되기 때문에 체크를 못한다.
+    - 그래서 컴파일 단계에서 타입을 강하게 체크하는 듯..
+
+이 두가지 이유 때문에 배열과 리스트를 합체서 쓸 수 없다. 타입 안정성이 떨어지기 때문에 사용하지 못하게 했다.
+
+```java
+new List<E>[], new List<String>[] // 사용 불가
+```
+
+### 아이템 29: 이왕이면 제네릭 타입으로 만들라
+
+제네릭 문법을 활용하여 코드를 작성하는 요령에 대해 설명하지만 이 부분은 생략하겠다. 
+
+일반적으로 여러 타입으로 받을 수 있을 때 형변환을 사용하는데 제네릭을 사용하면 형변환 없이 사용할 수 있다.
+
+### 아이템 30: 이왕이면 제네릭 메소드로 만들라
+
+매개변수화 타입을 받는 정적 유틸리티 메소드는 보통 제네릭이다.
+
+제네릭 타입과 마찬가지로 메소드에서 형변환해서 사용하기보다 제네릭 메소드를 사용하는 것이 더 안전하고 사용하기 좋다.
+
+### 아이템 31: 한정적 와일드카드를 사용해 API 유연성을 높이라
+
+제네릭 타입은 불공변이다. 여기서 불공변이란 서로 다른 타입 Type1과 Type2가 있을 때 List<Type1>과 List<Type2>는 서로 상/하위 타입 관계가 아니다라는 의미다.
+
+```java
+List<Object>와 List<String>은 서로 불공변이다.
+
+// 가능
+List<Object> objectList = new ArrayList<>();
+objectList.add("string")
+
+// 불가능
+List<String> stringList = new ArrayList<>();
+stringList.add(new Object())
+
+// 하위 타입 처럼 보이는 List<String>이 List<Object>을 대신하여 사용할 수 없기 때문에 LSP에 위배된다.
+```
+
+불공변인 제네릭 타입에 타입을 제한하여 하위 타입의 값을 허용하고 싶은 경우 와일드카드를 사용하면 된다.
+
+```java
+// 스택에서의 pushAll
+// 스택에서 push는 객체를 넣는 것
+// 스택에서 값을 넣으려면 상위 객체는 넣을 수 없고 하위 객체는 넣을 수 있다. LSP
+// 타입 E를 read하면 생산자
+public void pushAll(Iterable<? extends E> src) {
+	for (E e : src) {
+		push(e);
+	}
+}
+```
+
+반대로 상위 타입의 값을 허용하고 싶은 경우에도 와일드 카드를 사용하면 된다.
+
+```java
+// 스택에서 popAll
+// 스택에서 pop은 객체를 빼내는 것
+// 여기서 dst에 stack에 있는 값을 넣으려면 스택의 객체가 dst의 하위 객체여야 한다.
+// 타입 E에 write하면 소비자
+public void popAll(Colections<? super E> dst) {
+	while (!isEmpty()) {
+		dst.add(pop());
+	}
+}
+```
+
+어떤 와일드 타입을 써야하는 고민되면 `PECS` 를 외우면 된다. 
+
+- PECS : producer-extends, consumer-super
+    - 생산자/소비자라는 말이 어려우면 get/put으로 외워도 된다.
+
+타입 매개변수와 와일드카드에는 공통되는 부분이 있어서, 메소드를 정의할 때 둘 중 어느 것을 사용해도 괜찮을 때가 많다. 예를 들어, 주어진 리스트에서 명시한 두 인덱스의 아이템을 교환하는 swap 메소드를 정의해보자.
+
+```java
+// 비한정적 타입 매개변수 <E> 사용
+public static <E> void swap(List<E> list, int i, int j);
+// 비한정적 와일드카드 <?> 사용
+public static void swap(List<?> list, int i, int j);
+```
+
+위 API는 둘 다 같은 기능을 하지만 비한정적 와일드 카드를 사용하면 타입 매개변수를 신경쓰지 않아서 더 좋다.
+
+기본적인 규칙으로 타입 매개변수가 한번만 나오면 와일드카드로 대체하는 것이 좋다.
+
+- 비한정적 타입 매개변수 → 비한정적 와일드카드
+- 한정적 타입 매개변수 → 한정적 와일드카드
+
+하지만 단순히 위와 같이 사용하면 컴파일 에러가 발생하고 아래와 같이 private 도우미 메소드를 작성해야한다.
+
+```java
+public static void swap(List<?> list, int i, int j) {
+	swapHelper(list, i, j);
+}
+
+private static <E> void swapHelper(List<E> list, int i, int j) {
+	list.set(i, list.set(j, list.get(i)));
+}
+```
+
+구현은 복잡해졌지만 외부에서는 깔끔하게 쓸 수 있는 메소드를 사용할 수 있다.
