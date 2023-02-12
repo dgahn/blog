@@ -878,3 +878,5 @@ private static <E> void swapHelper(List<E> list, int i, int j) {
 ### 아이템 33: 타입 안전 이종 컨테이너를 고려하라
 
 ### 아이템 34: int 상수 대신 열거 타입을 사용하라
+
+### 아이템 35: oridinal 메소드 대신 인스턴스 필드를 사용하라
