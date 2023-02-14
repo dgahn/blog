@@ -877,6 +877,35 @@ private static <E> void swapHelper(List<E> list, int i, int j) {
 
 ### 아이템 33: 타입 안전 이종 컨테이너를 고려하라
 
-### 아이템 34: int 상수 대신 열거 타입을 사용하라
+만약 타입별로 안전하게 인스턴스를 보장하고 싶다면 타입 안전 이종 컨테이너를 사용하면 된다. 
+
+```java
+public class Favorites {
+	private Map<Class<?>, Object> favorites = new HashMap<>();
+	
+	public <T> void putFavorite(Class<T> type, T instance) {
+		favorites.put(Objects.requireNonNull(type), instance);
+	}
+
+	public <T> T getFavorite(Class<T> type) {
+		return type.cast(favtorites.get(type));
+	}
+}
+```
+
+### 아이템 34: 상수 대신 열거 타입을 사용하라
+
+열거 타입은 특정 타입의 인스턴스를 일정 개수로 제한하고 상수 값을 정의한 다음, 그 외의 값은 허용하지 않는 타입이다.
+
+상수 열거 패턴은 여러가지 단점을 가지고 있다.
+
+1. 평범한 상수를 나열한 것 뿐이라 그 값이 클라이언트 파일에 그대로 새겨진다.
+    - 추후 상수의 값이 바뀌면 클라이언트도 다시 컴파일 해야한다.
+2. 정수 상수는 문자열로 출력하기 어렵다.
+    - 디버깅용으로 단순 상수는 의미가 없다.
+
+자바의 열거 타입은 완전한 형태의 클래스라서 상수 하나당 하나의 인스턴스만 존재함을 보장한다.
 
 ### 아이템 35: oridinal 메소드 대신 인스턴스 필드를 사용하라
+
+### 아이템 36: 비트 필드 대신 EnumSet을 사용하라
