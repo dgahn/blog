@@ -26,15 +26,30 @@ kotlinter {
 }
 
 dependencies {
+    /**
+     * for Kotlin
+     */
     implementation(kotlin("stdlib"))
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("io.github.microutils:kotlin-logging-jvm:3.0.2")
 
+    /**
+     * for Spring
+     */
+    implementation("org.springframework.boot:spring-boot-starter-web")
+
+    /**
+     * for Logging
+     */
+    implementation("io.github.microutils:kotlin-logging-jvm:3.0.2")
+    
+    /**
+     * for Testing
+     */
     testImplementation("org.springframework.boot:spring-boot-starter-test"){
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
         exclude(module = "mockito-core")
     }
     testImplementation("io.kotest:kotest-assertions-core:5.5.3")
+    testImplementation("io.kotest:kotest-runner-junit5:5.5.3")
     testImplementation("io.mockk:mockk:1.13.2")
 }
 
