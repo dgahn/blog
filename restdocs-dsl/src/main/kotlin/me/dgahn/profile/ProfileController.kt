@@ -2,22 +2,20 @@ package me.dgahn.profile
 
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.multipart.MultipartFile
 
 @RestController
 class ProfileController {
     data class Request(
         val id: Long,
         val name: String,
-        val img: MultipartFile,
         val access: ProfileAccess
     ) {
         fun toResponse(): Response {
             return Response(
                 id = id,
                 name = name,
-                img = img,
                 access = access
             )
         }
@@ -26,7 +24,6 @@ class ProfileController {
     data class Response(
         val id: Long,
         val name: String,
-        val img: MultipartFile,
         val access: ProfileAccess
     )
 
@@ -37,7 +34,7 @@ class ProfileController {
     }
 
     @PostMapping("/v1/api/profiles")
-    fun post(request: Request): ResponseEntity<Response> {
+    fun post(@RequestBody request: Request): ResponseEntity<Response> {
         return ResponseEntity.ok(request.toResponse())
     }
 }
