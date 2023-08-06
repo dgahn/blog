@@ -152,3 +152,75 @@ createHtml().body {
 ### 기타등등
 이외에도 inline, reified, scope function (run, apply, with 등)등을 통해
 DSL을 유용하게 만들 수 있다.
+
+## RestDocs DSL
+
+### RestDocs DSL를 만들게 된 계기
+토스 블로그를 찾게된 이유가 RestDocs를 작성하는게 불편했기 때문이다. 대표적으로 두가지 이유가 있다.
+1. RestDocs에서 작성하는 Snippet 부분들은 대부분 static 메소드다. 그렇기 때문에 내가 작성할 Snippet의 이름을 정확하게 알지 못하면 아예 작성을 못한다.
+2. 메소드 시그니처를 보고 작성할 수가 없다. 정확하게 작성하는 법을 찾아야하기 때문에.. 기억력이 좋지 않은 나에게 고통이었다.
+
+### 기존 RestDocs 작성 코드
+
+```kotlin
+mockMvc.perform(
+    post("/v1/api/profiles")
+        .contentType(MediaType.APPLICATION_JSON)
+).andExpect(status().isOk)
+    .andDo(
+        document(
+            "create-profile",
+            requestFields(
+                fieldWithPath("id").description("식별자"),
+                fieldWithPath("name").description("이름"),
+                fieldWithPath("access").description("접근"),
+            ),
+            responseFields(
+                fieldWithPath("id").description("식별자"),
+                fieldWithPath("name").description("이름"),
+                fieldWithPath("access").description("접근"),
+            )
+        )
+    )
+```
+
+### RestDocs DSL
+
+```kotlin
+this.spec.makeDocument(identifier = "index2") {
+    url = "/profiles/{name}"
+    method = Method.POST
+    pathVariables = listOf("name")
+    statusCode = HttpStatus.OK
+    requestBodyValue = request.toJson()
+    request {
+        pathVariables = pathVariables(
+            "name" meanPath "이름",
+        )
+        headers = requestHeaders(
+            "Authorization" meanHeader "인증"
+        )
+        requestBody = requestBody(
+            "name" type STRING meanBody "이름",
+            "age" type NUMBER meanBody "10"
+        )
+    }
+    response {
+        headers = responseHeaders(
+            "Authorization" meanHeader "인증"
+        )
+        responseBody = responseBody(
+            "name" type STRING meanBody "이름",
+            "age" type NUMBER meanBody "10"
+        )
+    }
+}
+```
+
+
+어떤 것이 더 좋을지는 사람마다 차이가 있을거 같다. 
+나 같은 경우 메소드 시그니처를 확실하게 알 수 있는 DSL이 편하지만 
+RestDocs에 대해서 확실하게 알고 있는 사람이라면 기존 방식이 더 좋을 수도 있다.
+
+## Github 주소
+[RESTDocs DSL](https://github.com/dgahn/blog/tree/main/restdocs-dsl)
