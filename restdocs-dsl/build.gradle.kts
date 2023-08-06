@@ -49,7 +49,7 @@ dependencies {
     /**
      * for Testing
      */
-    testImplementation("org.springframework.boot:spring-boot-starter-test"){
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
         exclude(module = "mockito-core")
     }
@@ -63,7 +63,13 @@ dependencies {
      */
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
 
-    
+    /**
+     * for RestDocs - RestAssured
+     */
+    testImplementation("io.rest-assured:spring-mock-mvc:5.3.1")
+    implementation("org.springframework.restdocs:spring-restdocs-restassured")
+    testImplementation("com.natpryce:konfig:1.6.10.0")
+
 }
 
 val snippetsDir by extra {

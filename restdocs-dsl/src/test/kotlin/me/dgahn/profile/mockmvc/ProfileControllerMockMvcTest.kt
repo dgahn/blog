@@ -1,8 +1,6 @@
 package me.dgahn.profile.mockmvc
 
 import io.kotest.core.spec.style.FunSpec
-import me.dgahn.profile.fixture.기본_요청DTO
-import me.dgahn.profile.util.toJson
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -26,7 +24,6 @@ class ProfileControllerMockMvcTest(
         mockMvc.perform(
             post("/v1/api/profiles")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(기본_요청DTO.toJson())
         ).andExpect(status().isOk)
             .andDo(
                 document(
